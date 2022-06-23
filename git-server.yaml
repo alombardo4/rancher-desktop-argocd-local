@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-server
+  namespace: argocd
+  labels:
+    app: git-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: git-server
+  template:
+    metadata:
+      labels:
+        app: git-server
+    spec:
+      containers:
+      - name: git-server
+        imagePullPolicy: Never
+        image: git-d
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            cpu: 250m
+            memory: 256Mi
+        ports:
+        - containerPort: 9418
+          name: git
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: git-server
+  namespace: argocd
+spec:
+  selector:
+    app: git-server
+  ports:
+  - port: 9418
+    targetPort: git
+    name: git

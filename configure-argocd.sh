@@ -1,5 +1,10 @@
 #! /bin/bash
+set -euxo pipefail
 
+ARGOCD_PORT=8080
+GIT_PORT=9418
+kubectl port-forward -n argocd svc/argocd-server $ARGOCD_PORT:80 &
+kubectl port-forward -n argocd svc/git-server $GIT_PORT:$GIT_PORT &
 
 REPO_SUFFIX=$(date '+%H%M%S')
 
@@ -11,7 +16,7 @@ echo "Git Directory: $GIT_DIR"
 
 cd $GIT_DIR && mkdir test && echo $'apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: my-configmap\ndata:\n  key: value' > test/test.configmap.yaml && git add . && git commit -m "Initial commit" && git push
 
-ARGOCD_ADMIN_PW=$(kubectl get secret argocd-initial-admin-secret -n argocd -o json | jq '.data.password' -r | base64 -D)
+ARGOCD_ADMIN_PW=$(kubectl get secret argocd-initial-admin-secret -n argocd -o json | jq '.data.password' -r | /usr/bin/base64 -D)
 
 BEARER_TOKEN=$(curl --insecure --fail --silent "https://localhost:${ARGOCD_PORT}/api/v1/session" -d "{\"username\":\"admin\",\"password\":\"${ARGOCD_ADMIN_PW}\"}" | jq -r '.token')
 

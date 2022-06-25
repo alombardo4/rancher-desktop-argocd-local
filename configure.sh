@@ -4,13 +4,18 @@ set -euxo pipefail
 trap 'pkill kubectl; kubectl delete ns argocd; exit 1' ERR
 
 kubectl create ns argocd
+colima start --kubernetes
+command -v nerdctl || colima nerdctl install
+nerdctl build . -t git-d -f ./Dockerfile.gitd --namespace k8s.io
+
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 kubectl apply -n argocd -f ./git-server.yaml
 
 ARGOCD_PORT=8080
 GIT_PORT=9418
 set +e
-while ! ARGOCD_ADMIN_PW="$(kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath='{.data.password}' | /usr/bin/base64 -D)"; do
+while ! ARGOCD_ADMIN_PW="$(kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath='{.data.password}' | /usr/bin/base64 -D)"
+do
   echo "Waiting for argocd-initial-admin-secret to be created..."
   sleep 1
 done

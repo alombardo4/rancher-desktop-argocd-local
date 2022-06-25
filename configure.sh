@@ -1,7 +1,7 @@
 #! /bin/bash
 set -euxo pipefail
 
-trap 'pkill kubectl; exit 1' ERR
+trap 'pkill kubectl; kubectl delete ns argocd; exit 1' ERR
 
 kubectl create ns argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml

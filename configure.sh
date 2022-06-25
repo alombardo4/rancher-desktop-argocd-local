@@ -25,7 +25,7 @@ REPO_SUFFIX=$(date '+%H%M%S')
 
 GIT_DIR=$TMPDIR--argo-repo-$REPO_SUFFIX
 
-git clone "git://localhost:$GIT_PORT/repo.git" $GIT_DIR
+git clone "git://127.0.0.1:$GIT_PORT/repo.git" $GIT_DIR
 
 echo "Git Directory: $GIT_DIR"
 

@@ -42,3 +42,4 @@ echo
 echo "Set up your application in the ArgoCD UI at https://localhost:$ARGOCD_PORT"
 echo
 echo "ArgoCD Admin Password: $ARGOCD_ADMIN_PW"
+echo $ARGOCD_ADMIN_PW | pbcopy

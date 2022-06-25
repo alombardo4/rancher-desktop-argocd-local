@@ -1,12 +1,22 @@
 #! /bin/bash
 set -euxo pipefail
 
+trap 'pkill kubectl; exit 1' ERR
+
 kubectl create ns argocd
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl apply -n argocd -f ./git-server.yaml
 
 ARGOCD_PORT=8080
 GIT_PORT=9418
-kubectl wait secret -n argocd argocd-initial-admin-secret --for=jsonpath='{.data.password}' --timeout=300s
+set +e
+while ! ARGOCD_ADMIN_PW="$(kubectl get secret -n argocd argocd-initial-admin-secret -o jsonpath='{.data.password}' | /usr/bin/base64 -D)"; do
+  echo "Waiting for argocd-initial-admin-secret to be created..."
+  sleep 1
+done
+kubectl wait -n argocd --for=condition=Available deployment/argocd-server
+kubectl wait -n argocd --for=condition=Available deployment/git-server
+set -e
 kubectl port-forward -n argocd svc/argocd-server $ARGOCD_PORT:80 &
 kubectl port-forward -n argocd svc/git-server $GIT_PORT:$GIT_PORT &
 sleep 5

@@ -14,8 +14,8 @@ while ! ARGOCD_ADMIN_PW="$(kubectl get secret -n argocd argocd-initial-admin-sec
   echo "Waiting for argocd-initial-admin-secret to be created..."
   sleep 1
 done
-kubectl wait -n argocd --for=condition=Available deployment/argocd-server
-kubectl wait -n argocd --for=condition=Available deployment/git-server
+kubectl wait -n argocd --for=condition=Available deployment/argocd-server --timeout ="3m"
+kubectl wait -n argocd --for=condition=Available deployment/git-server --timeout="3m"
 set -e
 kubectl port-forward -n argocd svc/argocd-server $ARGOCD_PORT:80 &
 kubectl port-forward -n argocd svc/git-server $GIT_PORT:$GIT_PORT &

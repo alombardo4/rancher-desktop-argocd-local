@@ -31,8 +31,8 @@ echo "Git Directory: $GIT_DIR"
 
 cd $GIT_DIR && mkdir test && echo $'apiVersion: v1\nkind: ConfigMap\nmetadata:\n  name: my-configmap\ndata:\n  key: value' > test/test.configmap.yaml && git add . && git commit -m "Initial commit" && git push
 
-argocd login localhost:$ARGOCD_PORT --insecure --username admin --password "$ARGOCD_ADMIN_PW"
-argocd repo add "git://localhost:$GIT_PORT/repo.git"
+BEARER_TOKEN=$(curl --insecure --fail --silent "https://localhost:${ARGOCD_PORT}/api/v1/session" -d "{\"username\":\"admin\",\"password\":\"${ARGOCD_ADMIN_PW}\"}" | jq -r '.token')
+curl --insecure --fail "https://localhost:${ARGOCD_PORT}/api/v1/repositories" -H "Authorization: Bearer $BEARER_TOKEN" -d "{\"type\":\"git\",\"repo\":\"git://git-server:9418/repo.git\"}"
 echo
 echo
 echo 'Done!'

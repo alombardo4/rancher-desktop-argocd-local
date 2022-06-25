@@ -1,10 +1,14 @@
 #! /bin/bash
 set -euxo pipefail
 
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
 ARGOCD_PORT=8080
 GIT_PORT=9418
+kubectl wait secret -n argocd argocd-initial-admin-secret --for condition=Available=True --timeout=600s
 kubectl port-forward -n argocd svc/argocd-server $ARGOCD_PORT:80 &
 kubectl port-forward -n argocd svc/git-server $GIT_PORT:$GIT_PORT &
+sleep 5
 
 REPO_SUFFIX=$(date '+%H%M%S')
 
